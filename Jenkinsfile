@@ -1,13 +1,40 @@
 #!/usr/bin/env groovy
-// Some fast steps to inspect the build server. Create a pipeline script job and add this:
+pipeline {
+  agent any
 
-node {
-   DOCKER_PATH = sh (script: 'command -v docker', returnStdout: true).trim()
-   echo "Docker path: ${DOCKER_PATH}"
-   
-   FREE_MEM = sh (script: 'free -m', returnStdout: true).trim()
-   echo "Free memory: ${FREE_MEM}"
-   
-   echo sh(script: 'env|sort', returnStdout: true)
+  stages {
+    stage("Build") {
+      steps {
+        sh 'mvn -v'
+      }
+    }
 
+    stage("Testing") {
+      parallel {
+        stage("Unit Tests") {
+          agent { docker 'openjdk:7-jdk-alpine' }
+          steps {
+            sh 'java -version'
+          }
+        }
+        stage("Functional Tests") {
+          agent { docker 'openjdk:8-jdk-alpine' }
+          steps {
+            sh 'java -version'
+          }
+        }
+        stage("Integration Tests") {
+          steps {
+            sh 'java -version'
+          }
+        }
+      }
+    }
+
+    stage("Deploy") {
+      steps {
+        echo "Deploy!"
+      }
+    }
+  }
 }
