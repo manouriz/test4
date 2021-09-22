@@ -1,33 +1,13 @@
 #!/usr/bin/env groovy
-pipeline {
-    agent any
-    environment {
-        POM_VERSION = readMavenPom().getVersion()
-        BUILD_RELEASE_VERSION = readMavenPom().getVersion().replace("-SNAPSHOT", "")
-        IS_SNAPSHOT = readMavenPom().getVersion().endsWith("-SNAPSHOT")
-        GIT_TAG_COMMIT = sh(script: 'git describe --tags --always', returnStdout: true).trim()
-    }
-    stages {
-        stage('stage one') {
-            steps {
-                script {
-                    tags_extra = "value_1"
-                }
-                echo "tags_extra: ${tags_extra}"
-            }
-        }
-        stage('stage two') {
-            steps {
-                echo "tags_extra: ${tags_extra}"
-            }
-        }
-        stage('stage three') {
-            when {
-                expression { tags_extra != 'bla' }
-            }
-            steps {
-                echo "tags_extra: ${tags_extra}"
-            }
-        }
-    }
+// Some fast steps to inspect the build server. Create a pipeline script job and add this:
+
+node {
+   DOCKER_PATH = sh (script: 'command -v docker', returnStdout: true).trim()
+   echo "Docker path: ${DOCKER_PATH}"
+   
+   FREE_MEM = sh (script: 'free -m', returnStdout: true).trim()
+   echo "Free memory: ${FREE_MEM}"
+   
+   echo sh(script: 'env|sort', returnStdout: true)
+
 }
